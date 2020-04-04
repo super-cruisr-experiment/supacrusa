@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Webrtc chat application" />
+
+    <meta
+      property="og:image"
+      content="https://us.123rf.com/450wm/hilch/hilch1802/hilch180200195/95169924-video-chatting-online-on-computer-vector-illustration-flat-cartoon-video-player-window-with-speaking.jpg?ver=6"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!--required scripts-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="./aframe-audioanalyser-component.js"></script>
+    <script src="./audio-build.js"></script>
+    <script src="./audioanalyser-waveform.js"></script>
+    <script src="audioanalyser-volume-bind.js"></script>
+    <script src="./if-no-headset.js"></script>
+    <script src="./webrtc.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+    <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
+    <script src="/spotify-web-api.js"></script>
+    <script src="./spotify.js"></script>
+    <script src="./color-on-beat.js"></script>
+    <script src="./ring-on-beat.js"></script>
+    <script src="./htmlbuild.js"></script>
+    <!--stylesheet-->
+   
+    <script>
+      AFRAME.registerComponent("showbutton", {
+        schema: {
+          target: { type: "selector" }
+        },
+        init: function() {
+          var show = false;
+          this.el.addEventListener("click", () => {
+            if (show) {
+              this.data.target.setAttribute("visible", "false");
+              this.el.querySelector("a").innerHTML = "Show Box";
+            } else {
+              this.data.target.setAttribute("visible", "true");
+              this.el.querySelector("a").innerHTML = "Hide Box";
+            }
+            show = !show;
+          });
+        }
+      });
+    </script>
+    <link rel="stylesheet" href="./css/menu.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+    />
+    <link
+      rel="icon"
+      href="https://www.pngrepo.com/download/91662/video-chat.png"
+    />
+    <link
+      href="//db.onlinewebfonts.com/c/f4e31ff864f4297e98cd95bd1d07fd7b?family=ClobberGroteskW01-Medium"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <title>CHRISTOPHER</title>
+  </head>
+
+  <body>
+    <!-- heres the VR -->
+    <div id="slide2" class="slide">
+      <div id="slide3" class="slide">
+        <div id="slide4" class="slide">
+          <a-scene
+            antialias="true"
+            vr-mode-ui="enabled: true"
+            loading-screen="backgroundColor: white"
+            background="color: black"
+          >
+            <a-assets>
+              <img
+                id="tex1"
+                src="https://cdn.glitch.com/0cba3a36-1bfa-4884-a74b-596f19bce4a8%2Fbox.png?v=1586023559922"
+              />
+
+              <img
+                id="dawn"
+                crossorigin="anonymous"
+                src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fdawn.jpeg"
+              />
+              <audio
+                id="song"
+                src="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2FSantigold.mp3"
+              ></audio>
+
+              <a-asset-item
+                id="avatar"
+                src="https://cdn.glitch.com/6b28578f-d32d-4827-b37d-986c31d59a4a%2Fmale.glb"
+              ></a-asset-item>
+
+              <template id="avatar-template">
+                <a-entity class="avatar" networked-audio-source>
+                  <a-entity gltf-model="#avatar" scale="0.015 0.015 0.015">
+                  </a-entity>
+                </a-entity>
+              </template>
+
+              <img
+                id="1"
+                crossorigin="anonymous"
+                src="https://cdn.glitch.com/84453bf2-c1e7-42ba-b62b-2c76c5a9a748%2F484.jpg"
+              />
+              <img
+                id="floor"
+                src="https://cdn.aframe.io/a-painter/images/floor.jpg"
+                crossorigin="anonymous"
+              />
+              <img
+                id="skymap"
+                src="https://cdn.aframe.io/a-painter/images/sky.jpg"
+                crossorigin="anonymous"
+              />
+              <a-asset-item
+                id="roomer"
+                src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fglassedit.glb"
+              ></a-asset-item>
+            </a-assets>
+            <!-- html menu in scene -->
+<a-entity id="infocenter" rotation="0 85 0">
+            <a-entity
+              id="menu"
+              class="screen menu dark"
+              htmlembed="ppu:256"
+              position="-2.712 2.5 -4.476"
+              rotation="0 45 0"
+            >
+              <h2>Menu</h2>
+              <ul>
+                <li><a href="#" class="button">Home</a></li>
+                <li><a href="#slide2" class="button">TELEPORTING</a></li>
+                <li><a href="#slide3" class="button">VOICE CONTROLS</a></li>
+                <li><a href="#slide4" class="button">THINGS</a></li>
+              </ul>
+            </a-entity>
+            <a-entity
+              id="main"
+              class="screen dark main"
+              htmlembed="ppu:256"
+              position="0 2.5 -5"
+            >
+              <div id="page1">
+                <h1>Welcome To SUPER.CRUISR</h1>
+                <p>
+                  SUPER.CRUISR is a web based platform that can be accessed from
+                  any browser on any device. In augmented reality mode the
+                  device you’re using will need to access your camera and
+                  possible your microphone in cases where there is voice
+                  commands or interaction available. This includes wearable tech
+                  such as mixed reality glasses or headsets.
+                </p>
+
+                <p>
+                  In cases where the browser does not have access to the camera
+                  or microphone as in the case with a desktop PC. You will
+                  experience the overlaid virtual world in a recreated virtual
+                  environment on your screen. .
+                </p>
+
+                <a href="#slide2" class="button next">NEXT</a>
+              </div>
+              <div id="page2">
+                <h1>TELEPORTING</h1>
+                <p>
+                  Line up the blue ring/cursor with the blue disks in the scene
+                  and then tap/click on your screen to move to its location
+                </p>
+                <div class="code">
+                  <img
+                    src="https://cdn.glitch.com/0cba3a36-1bfa-4884-a74b-596f19bce4a8%2Faframe.png"
+                    width="80"
+                    height="80"
+                  />
+                </div>
+                <div class="code">
+                  <img
+                    src="https://cdn.glitch.com/0cba3a36-1bfa-4884-a74b-596f19bce4a8%2Faframe.png"
+                    width="80"
+                    height="80"
+                  />
+                </div>
+                <a href="#" class="button prev">Prev Page</a>
+                <a href="#slide3" class="button next">Next Page</a>
+              </div>
+              <div id="page3">
+                <h1>VOICE CONTROLS</h1>
+                <p>
+                  when prompted, give the site access to your mic. doing this
+                  will let you navigate the scene using the commands:
+                  <br />
+                  START MOVE
+                  <br />
+                  GO TO
+                </p>
+                <div class="code">
+                  <img
+                    src="https://cdn.glitch.com/0cba3a36-1bfa-4884-a74b-596f19bce4a8%2Faframe.png"
+                    width="80"
+                    height="80"
+                  />
+                </div>
+                <a-entity showbutton="target:#box"
+                  ><a class="button" href="javascript:void(0)"
+                    >Show Box</a
+                  ></a-entity
+                >
+                <a href="#slide2" class="button prev">Prev Page</a>
+                <a href="#slide4" class="button next">Next Page</a>
+              </div>
+              <div id="page4">
+                <h1></h1>
+                
+                <a href="#slide3" class="button prev">Prev Page</a>
+              </div>
+            </a-entity>
+            <a-entity
+              id="#menu"
+              class="screen menu dark"
+              htmlembed="ppu:256"
+              position="2.712 2.5 -4.476"
+              rotation="0 -45 0"
+            >
+              <h2>Links</h2>
+              <a class="imgLink" href="https://aframe.io/"
+                ><img src="assets/aframe.png" width="80" height="80" />
+                <div>A-Frame</div></a
+              >
+              <a
+                class="imgLink"
+                href="https://github.com/supereggbert/aframe-htmlembed-component"
+                ><img src="assets/github.png" width="80" height="80" />
+                <div>Github</div></a
+              >
+              <a
+                class="imgLink"
+                href="https://www.npmjs.com/package/aframe-htmlembed-component"
+                ><img src="assets/npm.png" width="80" height="80" />
+                <div>npm</div></a
+              >
+            </a-entity>
+            <a-box
+              material="src:#tex1"
+              scale="0.5 0.5 0.5"
+              position="0 0.5 -4"
+              id="box"
+              visible="false"
+            ></a-box>
+          </a-entity>
+            <!-- end html menu in scene -->
+
+            <a-entity
+              id="box1"
+              geometry=""
+              material="color: #C03546"
+              color-on-beat="analyserEl: #analyser"
+              ring-on-beat="analyserEl: #analyser"
+              position="0 1.92548 19.09356"
+            >
+            </a-entity>
+
+            <a-entity
+              id="analyser"
+              audioanalyser="src: [object HTMLAudioElement]"
+              spotify=""
+            >
+              <audio crossorigin="anonymous" loop="" id="spotifyTrack"></audio
+            ></a-entity>
+
+            <a-entity
+              id="text"
+              text="value: Say out loud 'play <artist name or song>'; color: #FFF; width: 3"
+              position="0.3 3 -3"
+              remove-on-event="el: #analyser; event: spotify-play"
+            >
+            </a-entity>
+
+            <a-light type="ambient" color="#222"></a-light>
+            <a-light type="point" position="1 2 1"></a-light>
+            <a-light type="point" position="-2 2 1"></a-light>
+
+            <a-entity
+              id="ground"
+              geometry="primitive: circle; radius: 30.5"
+              rotation="-90 0 0"
+              material="src: #floor"
+              position="0 -15 0"
+            ></a-entity>
+
+            <a-entity
+              id="rig"
+              movement-controls="controls: checkpoint"
+              checkpoint-controls="mode: animate"
+            >
+              <a-entity
+                id="player"
+                networked="template:#avatar-template; attachTemplateToLocal: false;"
+                camera
+                position="0 1.6 0"
+                look-controls="pointerLockEnabled: true"
+              >
+                <a-entity
+                  cursor
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03;"
+                  material="color: #CCC; shader: flat;"
+                ></a-entity>
+              </a-entity>
+            </a-entity>
+
+            <a-entity position="1 1 1">
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-3 0 23.95796"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-39.48201 1 23.95796"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="6.9779 1 -19.52352"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="6.9779 1 -19.52352"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-32.6342 1 -23.71695"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-32.6342 1 -52.83942"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-32.6342 1 -17.16431"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-9.70907 1 4.42701"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-18.33692 1 6.65032"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-50.57416 1 8.0499"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="-24.83687 1 5.7167"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="13.43209 1 11.51365"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+
+              <a-cylinder
+                checkpoint=""
+                radius="1"
+                height="0.1"
+                position="13.43209 1 -13.75026"
+                color="#39BB82"
+                material=""
+                geometry=""
+              ></a-cylinder>
+            </a-entity>
+
+            <a-entity position="0 0 0">
+              <a-gltf-model
+                src="#roomer"
+                position="-30 -6.44855 9.5"
+                scale="0.9 0.9 0.9"
+                rotation=""
+                gltf-model="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fglassedit.glb"
+              >
+              </a-gltf-model>
+
+              <a-gltf-model
+                id="stand"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fstand.glb"
+                position="0 0.21708 -8.40854"
+                scale="0.06 0.06 0.06"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fstand.glb"
+                rotation="0 180 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="tv"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fled%20tv.glb"
+                position="-0.0787 1.66872 -8.72807"
+                scale="0.25 0.25 0.25"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fled%20tv.glb"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="hifi"
+                src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fplayer.glb"
+                scale="0.05 0.05 0.05"
+                position="-19.06646 3.11499 4.5312"
+                animation-mixer=""
+                gltf-model="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fplayer.glb"
+                rotation="0 -90 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="chair"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2FChair.glb"
+                scale="0.49 0.45 0.45"
+                position="-15.98207 1.30702 -10.81623"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2FChair.glb"
+                rotation="0 90 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="tv2"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fled%20tv.glb"
+                position="-7.80807 2.27259 -8.72807"
+                scale="0.3 0.3 0.3"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fled%20tv.glb"
+                rotation="0 -100 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="stage"
+                src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fstage.glb"
+                scale="3 3 3"
+                position="-92.40993 -0.06928 25.697"
+                gltf-model="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fstage.glb"
+                rotation="0 90 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="inflatable"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fscreen.glb"
+                position="-68.71965 -5.77498 -27.58117"
+                scale="0.9 0.9 0.9"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Fscreen.glb"
+                rotation="0 90 0"
+              ></a-gltf-model>
+
+              <a-gltf-model
+                id="tree"
+                src="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Ftree.glb"
+                position="4.65323 0.45019 13.10622"
+                scale="0.03 0.03 0.03"
+                gltf-model="https://cdn.glitch.com/1b811bd2-579a-4c8d-b5cf-0f6aaa353a02%2Ftree.glb"
+              ></a-gltf-model>
+            </a-entity>
+            <a-entity
+              light="color: #ccccff; intensity: 1; type: ambient;"
+              visible=""
+            ></a-entity>
+            <a-entity
+              light="color: #ffaaff; intensity: 1.5"
+              position="5 5 5"
+            ></a-entity>
+            <a-sky src="#dawn"></a-sky>
+          </a-scene>
+        </div>
+      </div>
+    </div>
+
+    <input type="checkbox" id="navCheckbox" checked />
+
+    <div class="navWrapper">
+      <nav class="nav">
+        <!-- nav --->
+
+        <ul class="nav__main">
+          <li class="nav__item">
+            <div id="uin"></div>
+          </li>
+
+          <div>
+            <li class="nav__item">
+              <input type="text" id="to" placeholder="Enter UIN here" />
+            </li>
+
+            <!-- buttons  --->
+            <li class="nav__item">
+              <button
+                id="startbtn"
+                onclick="myvideo()"
+                class="btn btn-outline-dark m-2"
+              >
+                <i class="fa fa-arrow-right"></i>
+                <span class="nav-text">Start</span>
+              </button>
+            </li>
+
+            <li class="nav__item">
+              <button
+                id="callbtn"
+                onclick="start(true)"
+                class="btn btn-outline-dark m-2"
+              >
+                <i class="fa fa-phone"></i>
+                <span class="nav-text">Call Out</span>
+              </button>
+            </li>
+
+            <li class="nav__item">
+              <button
+                id="hangbtn"
+                onclick="hangcall()"
+                class="btn btn-outline-dark m-2"
+              >
+                <i class="fa fa-phone-slash"></i>
+                <span class="nav-text">End Call</span>
+              </button>
+            </li>
+            <br />
+
+            <li class="nav__item">
+              <video id="localVideo" width="150" autoplay muted></video>
+            </li>
+            <li class="nav__item">
+              <video id="remoteVideo" width="150" autoplay></video>
+            </li>
+          </div>
+        </ul>
+        <label for="navCheckbox" class="navTrigger" id="navTrigger">
+          <span class="navTrigger__icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </label>
+      </nav>
+    </div>
+
+    <script>
+      document.addEventListener("click", function(event) {
+        var checkbox = document.getElementById("navCheckbox");
+        var label = document.getElementById("navTrigger");
+        if (event.target == checkbox) {
+          if (label.classList.contains("active")) {
+            label.classList.remove("active");
+          } else {
+            label.classList.add("active");
+          }
+        }
+      });
+    </script>
+
+    <script>
+      // On mobile remove elements that are resource heavy
+      var isMobile = AFRAME.utils.device.isMobile();
+
+      if (isMobile) {
+        var particles = document.getElementById("particles");
+        particles.parentNode.removeChild(particles);
+      }
+
+      // Define custom schema for syncing avatar color, set by random-color
+      NAF.schemas.add({
+        template: "#avatar-template",
+        components: ["position", "rotation"]
+      });
+    </script>
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
